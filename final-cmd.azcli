@@ -1,0 +1,44 @@
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+# install distributed jmeter
+#helm install distributed-jmeter stable/distributed-jmeter
+helm install distributed-jmeter --set server.replicaCount=3 stable/distributed-jmeter 
+
+# get jmeter master name
+#kubectl get pods -l app.kubernetes.io/component=master -o jsonpath='{.items[*].metadata.name}'
+set MASTER_NAME=distributed-jmeter-master-757dc66498-lf87f
+
+# get jmeter server ip addresses
+#kubectl get pods -l app.kubernetes.io/component=server -o jsonpath='{.items[*].status.podIP}'
+set SERVER_IPS=10.244.2.100,10.244.3.76,10.244.3.75
+
+# get jmeter server names
+#kubectl get pods -l app.kubernetes.io/component=server -o jsonpath='{.items[*].metadata.name}'
+#set SERVER_NAME=distributed-jmeter-server-559d89d79-v67zp
+#set SERVER_NAME=distributed-jmeter-server-559d89d79-x7g26
+#set SERVER_NAME=distributed-jmeter-server-7cc9659bcb-6lvd5
+
+# copy jmeter jmx file to jmeter master
+kubectl cp qap-uat-cloud-80.jmx %MASTER_NAME%:/jmeter
+
+# copy supporting csvs to each jmeter server
+kubectl cp qap-uat-exam-1mb.csv distributed-jmeter-server-559d89d79-v67zp:/jmeter
+kubectl cp qap-uat-student.csv %SERVER_NAME%:/jmeter
+kubectl cp qap-uat-teacher.csv %SERVER_NAME%:/jmeter
+
+# run jmeter test
+set TEST_NAME=
+kubectl exec -it %MASTER_NAME% -- jmeter -n -t /jmeter/qap-uat-cloud-003m-70.jmx -R %SERVER_IPS% -l /jmeter/qap-uat-cloud.jtl -e -o /jmeter/dashboard
+
+# download jmeter dashboard report
+kubectl cp %MASTER_NAME%:/jmeter/dashboard dashboard
+
+# delete jmeter reports
+kubectl exec -it %MASTER_NAME% -- rm -rf /jmeter/dashboard/
+kubectl exec -it %MASTER_NAME% -- rm -f /jmeter/qap-uat-cloud.jtl
+kubectl exec -it %MASTER_NAME% -- rm -f /jmeter/qap-uat.cloud.jmx
+
+# uninstall distributed jmeter
+helm delete distributed-jmeter
+
+# debug into jmeter master
+kubectl exec -it %MASTER_NAME% -- /bin/bash
