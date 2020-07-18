@@ -1,0 +1,29 @@
+az group create --name=kuar --location=westus
+
+az aks create --resource-group=kuar --name=kuar-cluster --node-count=2 --node-vm-size=Standard_D1 --node-osdisk-size=30 --generate-ssh-keys
+
+az aks get-credentials --resource-group=kuar --name=kuar-cluster
+
+az aks install-cli
+
+az aks nodepool update --enable-cluster-autoscaler -g kuar --cluster-name kuar-cluster --name nodepool1 --min-count 1 --max-count 3
+az aks nodepool update --disable-cluster-autoscaler -g kuar --cluster-name kuar-cluster --name nodepool1
+az aks nodepool scale --node-count 2 -g kuar --cluster-name kuar-cluster --name nodepool1
+
+-------------------------------
+
+kubectl version
+
+kubectl get componentstatuses
+
+kubectl get nodes
+
+kubectl describe nodes aks-nodepool1-82799443-vmss000000
+
+kubectl get daemonSets --namespace=kube-system kube-proxy
+
+kubectl get deployments --namespace=kube-system coredns
+
+kubectl get services --namespace=kube-system kube-dns
+
+kubectl proxy

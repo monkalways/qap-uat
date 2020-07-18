@@ -31,20 +31,14 @@ for server_name in ${SERVER_NAMES}; do
 done
 
 # copy jmeter jmx file to jmeter master
-kubectl cp qap-uat-cloud.jmx ${MASTER_NAME}:/jmeter
+kubectl cp jmeter/qap-uat-cloud.jmx ${MASTER_NAME}:/jmeter
 
 INDEX=1
 
 # copy supporting csvs to each jmeter server
 for server_name in ${SERVER_NAMES}; do
-    kubectl cp qap-uat-exam-1mb.csv ${server_name}:/jmeter
-    kubectl cp qap-uat-student-${INDEX}.csv ${server_name}:/jmeter/qap-uat-student.csv
-    kubectl cp qap-uat-teacher.csv ${server_name}:/jmeter
+    kubectl cp jmeter/qap-uat-exam-1mb.csv ${server_name}:/jmeter
+    kubectl cp jmeter/qap-uat-student-${INDEX}.csv ${server_name}:/jmeter/qap-uat-student.csv
+    kubectl cp jmeter/qap-uat-teacher.csv ${server_name}:/jmeter
     ((INDEX = INDEX + 1))
 done
-
-# run jmeter test
-# kubectl exec -it ${MASTER_NAME} -- jmeter -n -t /jmeter/qap-uat-cloud.jmx -R ${SERVER_IPS// /,} -l /jmeter/qap-uat-cloud.jtl -e -o /jmeter/dashboard
-
-# download jmeter dashboard report
-# kubectl cp ${MASTER_NAME}:/jmeter/dashboard /g/workspaces/2020/2020-05/Hands-On-Kubernetes-on-Azure/qap-uat/dashboard
