@@ -1,6 +1,6 @@
 az group create --name=kuar --location=westus
 
-az aks create --resource-group=kuar --name=kuar-cluster --node-count=2 --node-vm-size=Standard_D1 --node-osdisk-size=30 --generate-ssh-keys
+az aks create --resource-group=kuar --name=kuar-cluster --node-count=1 --node-vm-size=Standard_D3 --node-osdisk-size=30 --generate-ssh-keys
 
 az aks get-credentials --resource-group=kuar --name=kuar-cluster
 
